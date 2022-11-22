@@ -1,0 +1,1 @@
+702202d755a7ed97a3b408b5f895df13f6f8ec7ba475008e5742351f190d878c  ./target/wasm32-unknown-unknown/release/authz_demo.wasm

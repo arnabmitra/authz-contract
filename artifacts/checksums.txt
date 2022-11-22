@@ -1,0 +1,1 @@
+37f3aab10a4cc0413bb96c3a1b68736a799daa20528406e72ed3eeb4a713ec67  authz_demo.wasm
