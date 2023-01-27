@@ -31,9 +31,6 @@ cw-utils = "0.15.1"
 cw2 = "0.15.1"
 schemars = "0.8.10"
 serde = { version = "1.0.137", default-features = false, features = ["derive"] }
-provenance-sdk-proto = "0.1.1"
-cosmos-sdk-proto = { version = "0.16", default-features = false }
-prost = "0.9.0"
 # TODO: this can be updated
 thiserror = { version = "1.0.31" }
 
