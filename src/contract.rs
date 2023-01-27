@@ -1,3 +1,10 @@
+use cosmos_sdk_proto::cosmos::authz::v1beta1::MsgExec;
+use cosmos_sdk_proto::cosmos::bank::v1beta1::MsgSend;
+use cosmos_sdk_proto::cosmos::base::v1beta1::Coin;
+use cosmos_sdk_proto::cosmos::staking::v1beta1::MsgDelegate;
+
+use cosmos_sdk_proto::traits::Message;
+use cosmos_sdk_proto::traits::MessageExt;
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
@@ -8,12 +15,8 @@ use cw2::set_contract_version;
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 use crate::state::{Config, CONFIG};
-use protobuf::Message;
 // Get the protobuf file we care about
-include!("protos/mod.rs");
-use CosmosAuthz::MsgExec;
-use CosmosBankSend::Coin;
-use CosmosBankSend::MsgSend;
+// include!("protos/mod.rs");
 
 // Version info for migration (boilerplate stuff)
 const CONTRACT_NAME: &str = "crates.io:authz-demo";
@@ -97,23 +100,24 @@ pub fn execute_transfer(
     deps.api.addr_validate(&granter_address)?;
     deps.api.addr_validate(&contract_address)?;
 
-    // send from smart contract to a random address
-    let mut send = MsgSend::new();
-    send.from_address = granter_address; // bob;s address
-    send.to_address = to_address; // alice's address
-    let mut coin: Coin = Coin::new();
-    coin.denom = denom;
-    coin.amount = amount;
-    send.amount = vec![coin];
+    let mut send = MsgSend {
+        to_address: to_address.to_owned(),
+        from_address: granter_address,
+        amount: vec![Coin {
+            denom: denom.to_string(),
+            amount: amount,
+        }],
+    };
 
-    let mut exec = MsgExec::new();
-    exec.grantee = contract_address; // contract address
-    exec.msgs = vec![send.to_any().unwrap()];
-    let exec_bytes: Vec<u8> = exec.write_to_bytes().unwrap();
+    let exec = MsgExec {
+        msgs: vec![send.to_any().unwrap()],
+        grantee: contract_address,
+    }
+    .encode_to_vec();
 
     let msg = CosmosMsg::Stargate {
         type_url: "/cosmos.authz.v1beta1.MsgExec".to_string(),
-        value: Binary::from(exec_bytes),
+        value: Binary::from(exec),
     };
     Ok(Response::new()
         .add_attribute("contract", "authz_demo")
